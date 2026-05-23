@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Job Tracker</title>
+  <title>Job Tracker - Kevin Malana</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: #F3F2EF;
       min-height: 100vh;
       color: #1C1C1C;
     }
 
-    /* --- navbar --- */
+    /* ---- NAVBAR ---- */
     .navbar {
       background: #fff;
       box-shadow: 0 1px 3px rgba(0,0,0,0.15);
@@ -24,199 +24,690 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: sticky;
+      position: fixed;
       top: 0;
+      left: 0;
+      right: 0;
       z-index: 100;
     }
     .navbar-brand {
       font-size: 20px;
       font-weight: 700;
       color: #0A66C2;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .navbar-brand-icon {
+      width: 32px;
+      height: 32px;
+      background: #0A66C2;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
     }
     .navbar-right {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
     .search-input {
       border: 1px solid #ccc;
       border-radius: 4px;
       padding: 6px 12px;
       font-size: 14px;
-      width: 220px;
+      width: 200px;
       outline: none;
+      background: #EEF3F8;
+      transition: border-color 0.15s, background 0.15s;
     }
-    .search-input:focus { border-color: #0A66C2; }
+    .search-input:focus { border-color: #0A66C2; background: #fff; }
 
-    /* --- stats bar --- */
-    .stats-bar {
-      display: flex;
-      gap: 8px;
-      padding: 12px 24px;
-      flex-wrap: wrap;
-    }
-    .stat-pill {
-      background: #fff;
-      border-radius: 20px;
-      padding: 4px 14px;
+    .sort-select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 6px 10px;
       font-size: 13px;
-      font-weight: 600;
-      border: 1px solid #e0e0e0;
+      outline: none;
+      background: #fff;
+      cursor: pointer;
       color: #444;
     }
-    .stat-pill span { color: #0A66C2; margin-left: 4px; }
+    .sort-select:focus { border-color: #0A66C2; }
 
-    /* --- board --- */
-    .board {
+    /* ---- LAYOUT ---- */
+    .app-layout {
       display: flex;
-      gap: 12px;
-      padding: 0 24px 32px;
-      overflow-x: auto;
-      align-items: flex-start;
+      margin-top: 56px;
+      min-height: calc(100vh - 56px);
     }
 
-    .column {
-      background: #fff;
-      border-radius: 8px;
-      min-width: 240px;
-      flex: 1;
-      max-width: 300px;
+    /* ---- LEFT SIDEBAR ---- */
+    .sidebar {
+      width: 230px;
+      flex-shrink: 0;
+      padding: 16px 12px;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+      gap: 12px;
     }
-    .column-header {
-      padding: 12px 14px;
+
+    .sidebar-profile-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .sidebar-profile-bg {
+      height: 48px;
+      background: linear-gradient(135deg, #0A66C2, #0073b1);
+      position: relative;
+    }
+    .sidebar-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #C37D16;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid #fff;
+      position: absolute;
+      bottom: -20px;
+      left: 16px;
+    }
+    .sidebar-profile-info {
+      padding: 28px 14px 14px;
+    }
+    .sidebar-name {
       font-weight: 700;
       font-size: 14px;
-      border-bottom: 2px solid transparent;
+      color: #1C1C1C;
+    }
+    .sidebar-location {
+      font-size: 12px;
+      color: #666;
+      margin-top: 2px;
+    }
+    .sidebar-divider {
+      height: 1px;
+      background: #e0e0e0;
+      margin: 8px 0;
+    }
+    .sidebar-stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 3px 0;
+    }
+    .sidebar-stat-label {
+      font-size: 12px;
+      color: #555;
+    }
+    .sidebar-stat-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0A66C2;
+    }
+    .sidebar-response {
+      font-size: 12px;
+      color: #666;
+      padding: 4px 0 2px;
+    }
+    .sidebar-response strong {
+      color: #2E7D32;
+    }
+
+    .sidebar-nav {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .sidebar-nav-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #888;
+      padding: 12px 14px 6px;
+    }
+    .sidebar-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #444;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+      border-left: 3px solid transparent;
+    }
+    .sidebar-nav-item:hover { background: #EEF3F8; color: #0A66C2; }
+    .sidebar-nav-item.active {
+      background: #EEF3F8;
+      color: #0A66C2;
+      border-left-color: #0A66C2;
+      font-weight: 700;
+    }
+    .sidebar-nav-badge {
+      margin-left: auto;
+      background: #0A66C2;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 1px 7px;
+      min-width: 20px;
+      text-align: center;
+    }
+    .sidebar-nav-badge.red { background: #C62828; }
+
+    /* ---- MAIN CONTENT ---- */
+    .main-content {
+      flex: 1;
+      padding: 16px 16px 32px;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    /* ---- STATS BAR ---- */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 14px 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .stat-card-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #888;
+    }
+    .stat-card-value {
+      font-size: 26px;
+      font-weight: 700;
+      color: #1C1C1C;
+      line-height: 1.1;
+    }
+    .stat-card-sub {
+      font-size: 11px;
+      color: #888;
+    }
+    .stat-card.applied   .stat-card-value { color: #0A66C2; }
+    .stat-card.interview .stat-card-value { color: #F57F17; }
+    .stat-card.offer     .stat-card-value { color: #2E7D32; }
+    .stat-card.rate      .stat-card-value { color: #7B1FA2; }
+
+    /* ---- BOARD ---- */
+    .board {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      align-items: flex-start;
+      padding-bottom: 8px;
+    }
+    .board::-webkit-scrollbar { height: 6px; }
+    .board::-webkit-scrollbar-track { background: transparent; }
+    .board::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+
+    .column {
+      background: #EAEAEA;
+      border-radius: 8px;
+      min-width: 230px;
+      flex: 1;
+      max-width: 280px;
+      display: flex;
+      flex-direction: column;
+    }
+    .column-header {
+      padding: 10px 12px;
+      font-weight: 700;
+      font-size: 13px;
       border-radius: 8px 8px 0 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 6px;
     }
-    .column-header .col-count {
-      font-size: 12px;
-      font-weight: 600;
-      background: #F3F2EF;
+    .column-header-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .col-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .col-count {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(255,255,255,0.6);
       border-radius: 10px;
-      padding: 2px 8px;
+      padding: 1px 7px;
       color: #555;
     }
-    .col-Wishlist  .column-header { border-color: #B0BEC5; color: #546E7A; }
-    .col-Applied   .column-header { border-color: #0A66C2; color: #0A66C2; }
-    .col-Interview .column-header { border-color: #F9A825; color: #F57F17; }
-    .col-Offer     .column-header { border-color: #2E7D32; color: #2E7D32; }
-    .col-Rejected  .column-header { border-color: #C62828; color: #C62828; }
+    .col-add-btn {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: #777;
+      line-height: 1;
+      padding: 0 2px;
+      border-radius: 4px;
+    }
+    .col-add-btn:hover { background: rgba(0,0,0,0.07); color: #333; }
+
+    .col-Wishlist  .column-header { color: #546E7A; }
+    .col-Wishlist  .col-dot { background: #B0BEC5; }
+    .col-Applied   .column-header { color: #0A66C2; }
+    .col-Applied   .col-dot { background: #0A66C2; }
+    .col-Interview .column-header { color: #F57F17; }
+    .col-Interview .col-dot { background: #F9A825; }
+    .col-Offer     .column-header { color: #2E7D32; }
+    .col-Offer     .col-dot { background: #4CAF50; }
+    .col-Rejected  .column-header { color: #C62828; }
+    .col-Rejected  .col-dot { background: #EF5350; }
 
     .column-cards {
       padding: 8px;
-      min-height: 80px;
+      min-height: 120px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 7px;
+      border-radius: 0 0 8px 8px;
     }
     .column-cards.drag-over {
-      background: #E8F4FF;
+      background: #D0E4F7;
       border-radius: 0 0 8px 8px;
     }
 
-    /* --- card --- */
+    /* ---- EMPTY STATE ---- */
+    .empty-col {
+      text-align: center;
+      padding: 20px 10px;
+      color: #aaa;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .empty-col-icon {
+      font-size: 24px;
+      opacity: 0.4;
+    }
+    .empty-col-text { font-size: 12px; color: #bbb; }
+    .empty-col-btn {
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 12px;
+      border: 1px dashed #bbb;
+      background: transparent;
+      color: #888;
+      cursor: pointer;
+      margin-top: 2px;
+    }
+    .empty-col-btn:hover { border-color: #0A66C2; color: #0A66C2; background: #EEF3F8; }
+
+    /* ---- CARD ---- */
     .card {
       background: #fff;
       border: 1px solid #e0e0e0;
       border-radius: 8px;
-      padding: 12px;
-      cursor: grab;
-      transition: box-shadow 0.15s;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: box-shadow 0.15s, border-color 0.15s;
       user-select: none;
+      position: relative;
     }
-    .card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
-    .card.dragging { opacity: 0.4; }
+    .card:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.11); border-color: #c8c8c8; }
+    .card.dragging { opacity: 0.4; cursor: grabbing; }
+    .card.overdue-border { border-left: 3px solid #C62828; }
+    .card.selected { border-color: #0A66C2; box-shadow: 0 0 0 2px rgba(10,102,194,0.18); }
 
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      margin-bottom: 7px;
+    }
+    .card-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .card-titles { flex: 1; min-width: 0; }
     .card-company {
       font-weight: 700;
-      font-size: 14px;
-      margin-bottom: 2px;
+      font-size: 13px;
       color: #1C1C1C;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .card-role {
-      font-size: 13px;
-      color: #444;
-      margin-bottom: 6px;
-    }
-    .card-meta {
       font-size: 12px;
-      color: #777;
-      margin-bottom: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
+      color: #555;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .card-actions {
-      display: flex;
-      gap: 6px;
-    }
-    .btn-edit {
-      font-size: 12px;
-      padding: 3px 10px;
-      border-radius: 4px;
-      border: 1px solid #0A66C2;
-      color: #0A66C2;
-      background: #fff;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    .btn-edit:hover { background: #E8F4FF; }
-    .btn-delete {
-      font-size: 12px;
-      padding: 3px 10px;
-      border-radius: 4px;
-      border: 1px solid #C62828;
-      color: #C62828;
-      background: #fff;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    .btn-delete:hover { background: #FFEBEE; }
 
-    /* --- add job button --- */
+    .card-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    .chip {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+    .chip-date   { background: #EEF3F8; color: #0A66C2; }
+    .chip-salary { background: #E8F5E9; color: #2E7D32; }
+    .chip-days   { background: #F5F5F5; color: #777; }
+    .chip-follow { background: #FFF8E1; color: #F57F17; }
+    .chip-follow.overdue { background: #FFEBEE; color: #C62828; }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-days-ago {
+      font-size: 11px;
+      color: #aaa;
+    }
+    .card-menu-btn {
+      background: none;
+      border: none;
+      color: #aaa;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0 2px;
+      border-radius: 4px;
+      line-height: 1;
+    }
+    .card-menu-btn:hover { background: #F3F2EF; color: #555; }
+
+    /* ---- CONTEXT MENU ---- */
+    .ctx-menu {
+      display: none;
+      position: fixed;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      z-index: 500;
+      min-width: 160px;
+      overflow: hidden;
+    }
+    .ctx-menu.visible { display: block; }
+    .ctx-menu-header {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #888;
+      padding: 8px 14px 5px;
+    }
+    .ctx-menu-item {
+      padding: 8px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #333;
+    }
+    .ctx-menu-item:hover { background: #EEF3F8; color: #0A66C2; }
+    .ctx-menu-item.danger { color: #C62828; }
+    .ctx-menu-item.danger:hover { background: #FFEBEE; }
+    .ctx-menu-divider { height: 1px; background: #eee; margin: 3px 0; }
+
+    /* ---- ADD JOB BUTTON ---- */
     .btn-add {
       background: #0A66C2;
       color: #fff;
       border: none;
       border-radius: 24px;
-      padding: 8px 20px;
-      font-size: 14px;
+      padding: 7px 18px;
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
     }
     .btn-add:hover { background: #004182; }
 
-    /* --- modal overlay --- */
+    /* ---- SLIDE-OUT DETAIL PANEL ---- */
+    .detail-panel-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+    }
+    .detail-panel-overlay.open { display: block; }
+    .detail-panel-bg {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.25);
+    }
+    .detail-panel {
+      position: absolute;
+      top: 56px;
+      right: 0;
+      bottom: 0;
+      width: 400px;
+      max-width: 95vw;
+      background: #fff;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .detail-panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .detail-panel-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .detail-panel-title { flex: 1; }
+    .detail-company-name {
+      font-size: 17px;
+      font-weight: 700;
+      color: #1C1C1C;
+      line-height: 1.2;
+    }
+    .detail-role-name {
+      font-size: 14px;
+      color: #555;
+      margin-top: 2px;
+    }
+    .detail-status-badge {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 10px;
+    }
+    .detail-close-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #888;
+      padding: 0 4px;
+      border-radius: 4px;
+    }
+    .detail-close-btn:hover { background: #F3F2EF; color: #333; }
+
+    .detail-panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+    }
+    .detail-section {
+      margin-bottom: 18px;
+    }
+    .detail-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #888;
+      margin-bottom: 8px;
+    }
+    .detail-field-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 0;
+      font-size: 13px;
+      color: #333;
+      border-bottom: 1px solid #F3F2EF;
+    }
+    .detail-field-label {
+      min-width: 90px;
+      font-weight: 600;
+      color: #888;
+      font-size: 12px;
+    }
+    .detail-field-value { color: #1C1C1C; }
+    .detail-url-link {
+      color: #0A66C2;
+      text-decoration: none;
+      font-size: 13px;
+    }
+    .detail-url-link:hover { text-decoration: underline; }
+
+    .detail-status-select {
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-size: 13px;
+      outline: none;
+      background: #F9F9F9;
+    }
+    .detail-status-select:focus { border-color: #0A66C2; background: #fff; }
+
+    .detail-notes-area {
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      resize: vertical;
+      min-height: 90px;
+      background: #F9F9F9;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .detail-notes-area:focus { border-color: #0A66C2; background: #fff; }
+
+    .detail-panel-actions {
+      padding: 12px 20px;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      gap: 8px;
+    }
+    .detail-btn {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      text-align: center;
+    }
+    .detail-btn-primary {
+      background: #0A66C2;
+      color: #fff;
+    }
+    .detail-btn-primary:hover { background: #004182; }
+    .detail-btn-secondary {
+      background: #fff;
+      color: #0A66C2;
+      border: 1px solid #0A66C2;
+    }
+    .detail-btn-secondary:hover { background: #EEF3F8; }
+    .detail-btn-danger {
+      background: #fff;
+      color: #C62828;
+      border: 1px solid #C62828;
+    }
+    .detail-btn-danger:hover { background: #FFEBEE; }
+
+    /* ---- MODAL ---- */
     .modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.5);
-      z-index: 200;
+      z-index: 400;
       align-items: center;
       justify-content: center;
     }
     .modal-overlay.active { display: flex; }
-
     .modal {
       background: #fff;
-      border-radius: 8px;
-      width: 520px;
+      border-radius: 10px;
+      width: 540px;
       max-width: 95vw;
       max-height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.22);
     }
     .modal-header {
-      padding: 20px 24px 16px;
+      padding: 20px 24px 14px;
       border-bottom: 1px solid #e0e0e0;
       display: flex;
       align-items: center;
@@ -234,18 +725,26 @@
       cursor: pointer;
       color: #666;
       line-height: 1;
-      padding: 2px 6px;
+      padding: 2px 8px;
       border-radius: 4px;
     }
     .modal-close:hover { background: #F3F2EF; }
-
     .modal-body { padding: 20px 24px; }
 
+    .form-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #888;
+      margin-bottom: 12px;
+      margin-top: 4px;
+    }
     .form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 16px;
+      gap: 14px;
+      margin-bottom: 14px;
     }
     .form-group {
       display: flex;
@@ -253,26 +752,28 @@
       gap: 4px;
     }
     .form-group.full { grid-column: 1 / -1; }
-
     label {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
-      color: #444;
+      color: #555;
     }
     input, select, textarea {
       border: 1px solid #ccc;
-      border-radius: 4px;
+      border-radius: 6px;
       padding: 8px 10px;
       font-size: 14px;
       font-family: inherit;
       outline: none;
       transition: border-color 0.15s;
+      background: #F9F9F9;
     }
-    input:focus, select:focus, textarea:focus { border-color: #0A66C2; }
+    input:focus, select:focus, textarea:focus {
+      border-color: #0A66C2;
+      background: #fff;
+    }
     textarea { resize: vertical; min-height: 72px; }
-
     .modal-footer {
-      padding: 16px 24px;
+      padding: 14px 24px;
       border-top: 1px solid #e0e0e0;
       display: flex;
       justify-content: flex-end;
@@ -290,7 +791,7 @@
     }
     .btn-cancel:hover { background: #F3F2EF; }
     .btn-save {
-      padding: 8px 20px;
+      padding: 8px 24px;
       border-radius: 24px;
       border: none;
       background: #0A66C2;
@@ -301,7 +802,7 @@
     }
     .btn-save:hover { background: #004182; }
 
-    /* --- toast --- */
+    /* ---- TOAST ---- */
     .toast {
       position: fixed;
       bottom: 24px;
@@ -309,29 +810,39 @@
       transform: translateX(-50%) translateY(80px);
       background: #1C1C1C;
       color: #fff;
-      padding: 10px 20px;
+      padding: 10px 22px;
       border-radius: 24px;
       font-size: 14px;
       font-weight: 600;
       z-index: 999;
       transition: transform 0.3s;
+      white-space: nowrap;
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
 
-    /* --- empty state --- */
-    .empty-col {
-      text-align: center;
-      color: #aaa;
-      font-size: 12px;
-      padding: 16px 8px;
+    /* ---- STATUS BADGE COLORS ---- */
+    .badge-Wishlist  { background: #ECEFF1; color: #546E7A; }
+    .badge-Applied   { background: #E3F2FD; color: #0A66C2; }
+    .badge-Interview { background: #FFF8E1; color: #F57F17; }
+    .badge-Offer     { background: #E8F5E9; color: #2E7D32; }
+    .badge-Rejected  { background: #FFEBEE; color: #C62828; }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 800px) {
+      .sidebar { display: none; }
+      .stats-bar { grid-template-columns: repeat(2, 1fr); }
+      .detail-panel { width: 100vw; top: 56px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- navbar -->
+  <!-- NAVBAR -->
   <nav class="navbar">
-    <div class="navbar-brand">Job Tracker</div>
+    <div class="navbar-brand">
+      <div class="navbar-brand-icon">J</div>
+      Job Tracker
+    </div>
     <div class="navbar-right">
       <input
         type="text"
@@ -340,17 +851,170 @@
         placeholder="Search jobs..."
         oninput="handleSearch(this.value)"
       />
+      <select class="sort-select" id="sortSelect" onchange="handleSort(this.value)">
+        <option value="date_desc">Newest first</option>
+        <option value="date_asc">Oldest first</option>
+        <option value="company_az">Company A-Z</option>
+        <option value="followup">Follow-up date</option>
+      </select>
       <button class="btn-add" onclick="openModal(null)">+ Add Job</button>
     </div>
   </nav>
 
-  <!-- stats bar -->
-  <div class="stats-bar" id="statsBar"></div>
+  <!-- APP LAYOUT -->
+  <div class="app-layout">
 
-  <!-- kanban board -->
-  <div class="board" id="board"></div>
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+      <!-- Profile card -->
+      <div class="sidebar-profile-card">
+        <div class="sidebar-profile-bg">
+          <div class="sidebar-avatar">KM</div>
+        </div>
+        <div class="sidebar-profile-info">
+          <div class="sidebar-name">Kevin Malana</div>
+          <div class="sidebar-location">Sydney, NSW</div>
+          <div class="sidebar-divider"></div>
+          <div class="sidebar-stat-row">
+            <span class="sidebar-stat-label">Applied</span>
+            <span class="sidebar-stat-value" id="sbApplied">0</span>
+          </div>
+          <div class="sidebar-stat-row">
+            <span class="sidebar-stat-label">Interviews</span>
+            <span class="sidebar-stat-value" id="sbInterview">0</span>
+          </div>
+          <div class="sidebar-stat-row">
+            <span class="sidebar-stat-label">Offers</span>
+            <span class="sidebar-stat-value" id="sbOffer">0</span>
+          </div>
+          <div class="sidebar-divider"></div>
+          <div class="sidebar-response" id="sbResponseRate">Response Rate: <strong>0%</strong></div>
+        </div>
+      </div>
 
-  <!-- modal -->
+      <!-- Nav links -->
+      <div class="sidebar-nav">
+        <div class="sidebar-nav-title">Views</div>
+        <div class="sidebar-nav-item active" id="navAll" onclick="setNavView('all')">
+          All Jobs
+          <span class="sidebar-nav-badge" id="navAllBadge">0</span>
+        </div>
+        <div class="sidebar-nav-item" id="navFollowup" onclick="setNavView('followup')">
+          Follow-ups
+          <span class="sidebar-nav-badge red" id="navFollowupBadge">0</span>
+        </div>
+        <div class="sidebar-nav-item" id="navInterviews" onclick="setNavView('interviews')">
+          Interviews
+          <span class="sidebar-nav-badge" id="navInterviewsBadge">0</span>
+        </div>
+        <div class="sidebar-nav-item" id="navOffers" onclick="setNavView('offers')">
+          Offers
+          <span class="sidebar-nav-badge" id="navOffersBadge">0</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+      <!-- Stats bar -->
+      <div class="stats-bar" id="statsBar">
+        <div class="stat-card applied">
+          <div class="stat-card-label">Total Applied</div>
+          <div class="stat-card-value" id="statApplied">0</div>
+          <div class="stat-card-sub">applications</div>
+        </div>
+        <div class="stat-card interview">
+          <div class="stat-card-label">Interviews</div>
+          <div class="stat-card-value" id="statInterview">0</div>
+          <div class="stat-card-sub">in progress</div>
+        </div>
+        <div class="stat-card offer">
+          <div class="stat-card-label">Offers</div>
+          <div class="stat-card-value" id="statOffer">0</div>
+          <div class="stat-card-sub">received</div>
+        </div>
+        <div class="stat-card rate">
+          <div class="stat-card-label">Response Rate</div>
+          <div class="stat-card-value" id="statRate">0%</div>
+          <div class="stat-card-sub">applied to interviewed</div>
+        </div>
+      </div>
+
+      <!-- Kanban board -->
+      <div class="board" id="board"></div>
+    </div>
+  </div>
+
+  <!-- DETAIL SLIDE-OUT PANEL -->
+  <div class="detail-panel-overlay" id="detailOverlay">
+    <div class="detail-panel-bg" onclick="closeDetailPanel()"></div>
+    <div class="detail-panel" id="detailPanel">
+      <div class="detail-panel-header">
+        <div class="detail-panel-avatar" id="detailAvatar"></div>
+        <div class="detail-panel-title">
+          <div class="detail-company-name" id="detailCompany"></div>
+          <div class="detail-role-name" id="detailRole"></div>
+          <span class="detail-status-badge" id="detailStatusBadge"></span>
+        </div>
+        <button class="detail-close-btn" onclick="closeDetailPanel()">x</button>
+      </div>
+      <div class="detail-panel-body">
+
+        <!-- Status change -->
+        <div class="detail-section">
+          <div class="detail-section-title">Status</div>
+          <select class="detail-status-select" id="detailStatusSelect" onchange="detailChangeStatus(this.value)">
+            <option value="Wishlist">Wishlist</option>
+            <option value="Applied">Applied</option>
+            <option value="Interview">Interview</option>
+            <option value="Offer">Offer</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </div>
+
+        <!-- Job details -->
+        <div class="detail-section">
+          <div class="detail-section-title">Details</div>
+          <div class="detail-field-row">
+            <span class="detail-field-label">Date Applied</span>
+            <span class="detail-field-value" id="detailDate">-</span>
+          </div>
+          <div class="detail-field-row">
+            <span class="detail-field-label">Salary</span>
+            <span class="detail-field-value" id="detailSalary">-</span>
+          </div>
+          <div class="detail-field-row">
+            <span class="detail-field-label">Follow-up</span>
+            <span class="detail-field-value" id="detailFollowup">-</span>
+          </div>
+          <div class="detail-field-row" id="detailUrlRow">
+            <span class="detail-field-label">Job URL</span>
+            <a class="detail-url-link" id="detailUrl" href="#" target="_blank" rel="noopener">-</a>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="detail-section">
+          <div class="detail-section-title">Notes</div>
+          <textarea
+            class="detail-notes-area"
+            id="detailNotes"
+            placeholder="Add notes about this application..."
+            onblur="detailSaveNotes()"
+          ></textarea>
+        </div>
+
+      </div>
+      <div class="detail-panel-actions">
+        <button class="detail-btn detail-btn-secondary" onclick="editFromPanel()">Edit</button>
+        <button class="detail-btn detail-btn-danger" onclick="deleteFromPanel()">Delete</button>
+        <button class="detail-btn detail-btn-primary" onclick="detailSaveNotes()">Save Notes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD/EDIT JOB MODAL -->
   <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
     <div class="modal">
       <div class="modal-header">
@@ -358,16 +1022,20 @@
         <button class="modal-close" onclick="closeModal()">x</button>
       </div>
       <div class="modal-body">
+
+        <div class="form-section-title">Company & Role</div>
         <div class="form-row">
           <div class="form-group">
             <label for="fCompany">Company *</label>
-            <input type="text" id="fCompany" placeholder="e.g. Acme Corp" />
+            <input type="text" id="fCompany" placeholder="e.g. Atlassian" />
           </div>
           <div class="form-group">
             <label for="fRole">Role *</label>
-            <input type="text" id="fRole" placeholder="e.g. Software Engineer" />
+            <input type="text" id="fRole" placeholder="e.g. Product Manager" />
           </div>
         </div>
+
+        <div class="form-section-title">Application Info</div>
         <div class="form-row">
           <div class="form-group">
             <label for="fStatus">Status</label>
@@ -400,12 +1068,15 @@
             <input type="text" id="fUrl" placeholder="https://..." />
           </div>
         </div>
+
+        <div class="form-section-title">Notes</div>
         <div class="form-row">
           <div class="form-group full">
             <label for="fNotes">Notes</label>
-            <textarea id="fNotes" placeholder="Recruiter name, interview details..."></textarea>
+            <textarea id="fNotes" placeholder="Recruiter name, interview details, referral contact..."></textarea>
           </div>
         </div>
+
       </div>
       <div class="modal-footer">
         <button class="btn-cancel" onclick="closeModal()">Cancel</button>
@@ -414,27 +1085,99 @@
     </div>
   </div>
 
-  <!-- toast -->
+  <!-- CONTEXT MENU -->
+  <div class="ctx-menu" id="ctxMenu">
+    <div class="ctx-menu-header">Move to</div>
+    <div id="ctxMoveItems"></div>
+    <div class="ctx-menu-divider"></div>
+    <div class="ctx-menu-item" onclick="ctxEdit()">Edit</div>
+    <div class="ctx-menu-item danger" onclick="ctxDelete()">Delete</div>
+  </div>
+
+  <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
 <script>
-// Job Tracker - clean rewrite
-// All comments use ASCII only - no unicode box chars or special symbols
+// Job Tracker Enhanced - Huntr/Teal inspired
+// All comments use ASCII only. No unicode special chars.
 
 var SUPABASE_URL  = 'https://nxuxxazxkjdorqfmunmq.supabase.co';
 var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54dXh4YXp4a2pkb3JxZm11bm1xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1Mjg4MjUsImV4cCI6MjA5NTEwNDgyNX0.kQQuADeBtiiO7elLBo9CWfbA6k9ZHhKZLU2XoJZhWOQ';
 var client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// State variables
-var allJobs     = [];
-var editingId   = null;
-var dragId      = null;
+// --- App state ---
+var allJobs      = [];
+var editingId    = null;
+var dragId       = null;
 var filterSearch = '';
+var sortMode     = 'date_desc';
+var navView      = 'all';
+var detailJobId  = null;
+var ctxJobId     = null;
 
-// Column definitions - ordered list
+// Column order
 var COLUMNS = ['Wishlist', 'Applied', 'Interview', 'Offer', 'Rejected'];
 
-// ---- Toast helper ----
+// Avatar colors keyed by first char bucket
+var AVATAR_COLORS = [
+  '#0A66C2', '#00704A', '#E65100', '#6A1B9A',
+  '#1565C0', '#AD1457', '#00838F', '#558B2F',
+  '#4527A0', '#C62828'
+];
+
+// ---- Utility: escape HTML ----
+function esc(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g,  '&amp;')
+    .replace(/</g,  '&lt;')
+    .replace(/>/g,  '&gt;')
+    .replace(/"/g,  '&quot;')
+    .replace(/'/g,  '&#39;');
+}
+
+// ---- Utility: get avatar color from company name ----
+function getAvatarColor(name) {
+  if (!name) return AVATAR_COLORS[0];
+  var code = name.toUpperCase().charCodeAt(0) || 65;
+  return AVATAR_COLORS[(code - 65) % AVATAR_COLORS.length];
+}
+
+// ---- Utility: get company initial ----
+function getInitial(name) {
+  if (!name) return '?';
+  return name.trim().charAt(0).toUpperCase();
+}
+
+// ---- Utility: days since date string (YYYY-MM-DD) ----
+function daysSince(dateStr) {
+  if (!dateStr) return null;
+  var now   = new Date();
+  var then  = new Date(dateStr);
+  var diff  = Math.floor((now - then) / 86400000);
+  return diff;
+}
+
+// ---- Utility: is date overdue (before today) ----
+function isOverdue(dateStr) {
+  if (!dateStr) return false;
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  var d = new Date(dateStr);
+  return d < today;
+}
+
+// ---- Utility: format date for display ----
+function fmtDate(dateStr) {
+  if (!dateStr) return '';
+  var parts = dateStr.split('-');
+  if (parts.length !== 3) return dateStr;
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var m = parseInt(parts[1], 10);
+  return parts[2] + ' ' + (months[m - 1] || '') + ' ' + parts[0];
+}
+
+// ---- Toast ----
 function showToast(msg) {
   var el = document.getElementById('toast');
   el.textContent = msg;
@@ -455,60 +1198,184 @@ function loadJobs() {
         return;
       }
       allJobs = res.data || [];
-      renderBoard();
-      renderStats();
+      renderAll();
     });
+}
+
+// ---- Render everything ----
+function renderAll() {
+  renderStats();
+  renderSidebar();
+  renderBoard();
+}
+
+// ---- Compute stats ----
+function computeStats() {
+  var total     = 0;
+  var applied   = 0;
+  var interview = 0;
+  var offer     = 0;
+  var rejected  = 0;
+  var followupOverdue = 0;
+
+  for (var i = 0; i < allJobs.length; i++) {
+    var j = allJobs[i];
+    total++;
+    if (j.status === 'Applied')   applied++;
+    if (j.status === 'Interview') interview++;
+    if (j.status === 'Offer')     offer++;
+    if (j.status === 'Rejected')  rejected++;
+    // Count interviews + offers as responses
+    // overdue follow-up
+    if (j.follow_up_date && isOverdue(j.follow_up_date)) followupOverdue++;
+  }
+
+  // Response rate = (interviews + offers) / (applied + interviews + offers + rejected) * 100
+  var denominator = applied + interview + offer + rejected;
+  var rate = denominator > 0 ? Math.round(((interview + offer) / denominator) * 100) : 0;
+
+  return {
+    total: total,
+    applied: applied + interview + offer + rejected,  // total non-wishlist
+    interview: interview,
+    offer: offer,
+    rejected: rejected,
+    rate: rate,
+    followupOverdue: followupOverdue
+  };
 }
 
 // ---- Render stats bar ----
 function renderStats() {
-  var bar = document.getElementById('statsBar');
-  var total = allJobs.length;
-  var html = '<div class="stat-pill">Total<span>' + total + '</span></div>';
-  for (var i = 0; i < COLUMNS.length; i++) {
-    var col = COLUMNS[i];
-    var count = 0;
-    for (var j = 0; j < allJobs.length; j++) {
-      if (allJobs[j].status === col) count++;
-    }
-    html += '<div class="stat-pill">' + col + '<span>' + count + '</span></div>';
-  }
-  bar.innerHTML = html;
+  var s = computeStats();
+  document.getElementById('statApplied').textContent   = s.applied;
+  document.getElementById('statInterview').textContent  = s.interview;
+  document.getElementById('statOffer').textContent      = s.offer;
+  document.getElementById('statRate').textContent       = s.rate + '%';
 }
 
-// ---- Render board ----
-function renderBoard() {
-  var board = document.getElementById('board');
-  var search = filterSearch.toLowerCase().trim();
+// ---- Render sidebar ----
+function renderSidebar() {
+  var s = computeStats();
+  document.getElementById('sbApplied').textContent   = s.applied;
+  document.getElementById('sbInterview').textContent  = s.interview;
+  document.getElementById('sbOffer').textContent      = s.offer;
+  document.getElementById('sbResponseRate').innerHTML = 'Response Rate: <strong>' + s.rate + '%</strong>';
 
-  var filtered = allJobs;
+  document.getElementById('navAllBadge').textContent       = allJobs.length;
+  document.getElementById('navFollowupBadge').textContent  = s.followupOverdue;
+  document.getElementById('navInterviewsBadge').textContent = s.interview;
+  document.getElementById('navOffersBadge').textContent    = s.offer;
+}
+
+// ---- Set nav view ----
+function setNavView(view) {
+  navView = view;
+  var items = ['navAll', 'navFollowup', 'navInterviews', 'navOffers'];
+  for (var i = 0; i < items.length; i++) {
+    document.getElementById(items[i]).classList.remove('active');
+  }
+  var map = { all: 'navAll', followup: 'navFollowup', interviews: 'navInterviews', offers: 'navOffers' };
+  if (map[view]) document.getElementById(map[view]).classList.add('active');
+  renderBoard();
+}
+
+// ---- Sort jobs ----
+function sortJobs(jobs) {
+  var sorted = jobs.slice();
+  if (sortMode === 'date_desc') {
+    sorted.sort(function(a, b) {
+      var da = a.date_applied || a.created_at || '';
+      var db = b.date_applied || b.created_at || '';
+      return db.localeCompare(da);
+    });
+  } else if (sortMode === 'date_asc') {
+    sorted.sort(function(a, b) {
+      var da = a.date_applied || a.created_at || '';
+      var db = b.date_applied || b.created_at || '';
+      return da.localeCompare(db);
+    });
+  } else if (sortMode === 'company_az') {
+    sorted.sort(function(a, b) {
+      return (a.company || '').localeCompare(b.company || '');
+    });
+  } else if (sortMode === 'followup') {
+    sorted.sort(function(a, b) {
+      var fa = a.follow_up_date || 'zzzz';
+      var fb = b.follow_up_date || 'zzzz';
+      return fa.localeCompare(fb);
+    });
+  }
+  return sorted;
+}
+
+// ---- Filter jobs by search and nav view ----
+function filterJobs(jobs) {
+  var search = filterSearch.toLowerCase().trim();
+  var result = jobs;
+
+  // Nav view filter
+  if (navView === 'followup') {
+    result = [];
+    for (var i = 0; i < jobs.length; i++) {
+      if (jobs[i].follow_up_date && isOverdue(jobs[i].follow_up_date)) {
+        result.push(jobs[i]);
+      }
+    }
+  } else if (navView === 'interviews') {
+    result = [];
+    for (var i = 0; i < jobs.length; i++) {
+      if (jobs[i].status === 'Interview') result.push(jobs[i]);
+    }
+  } else if (navView === 'offers') {
+    result = [];
+    for (var i = 0; i < jobs.length; i++) {
+      if (jobs[i].status === 'Offer') result.push(jobs[i]);
+    }
+  }
+
+  // Search filter
   if (search) {
-    filtered = [];
-    for (var i = 0; i < allJobs.length; i++) {
-      var j = allJobs[i];
+    var searched = [];
+    for (var si = 0; si < result.length; si++) {
+      var j = result[si];
       if (
         (j.company && j.company.toLowerCase().indexOf(search) !== -1) ||
         (j.role    && j.role.toLowerCase().indexOf(search)    !== -1) ||
         (j.notes   && j.notes.toLowerCase().indexOf(search)   !== -1)
       ) {
-        filtered.push(j);
+        searched.push(j);
       }
     }
+    result = searched;
   }
 
+  return result;
+}
+
+// ---- Render board ----
+function renderBoard() {
+  var board = document.getElementById('board');
+  var filtered = filterJobs(sortJobs(allJobs));
   var html = '';
+
   for (var ci = 0; ci < COLUMNS.length; ci++) {
     var status = COLUMNS[ci];
-    var cards = [];
+    var cards  = [];
     for (var ji = 0; ji < filtered.length; ji++) {
       if (filtered[ji].status === status) cards.push(filtered[ji]);
     }
 
     html += '<div class="column col-' + status + '">';
     html += '<div class="column-header">';
+    html += '<div class="column-header-left">';
+    html += '<span class="col-dot"></span>';
     html += '<span>' + status + '</span>';
     html += '<span class="col-count">' + cards.length + '</span>';
     html += '</div>';
+    html += '<button class="col-add-btn" onclick="openModalForStatus(\'' + status + '\')" title="Add job to ' + status + '">+</button>';
+    html += '</div>';
+
     html += '<div class="column-cards" id="col-' + status + '"';
     html += ' ondragover="handleDragOver(event)"';
     html += ' ondrop="handleDrop(event, \'' + status + '\')"';
@@ -517,7 +1384,11 @@ function renderBoard() {
     html += '>';
 
     if (cards.length === 0) {
-      html += '<div class="empty-col">No jobs here</div>';
+      html += '<div class="empty-col">';
+      html += '<div class="empty-col-icon">o</div>';
+      html += '<div class="empty-col-text">No jobs here yet</div>';
+      html += '<button class="empty-col-btn" onclick="openModalForStatus(\'' + status + '\')">+ Add job</button>';
+      html += '</div>';
     } else {
       for (var ki = 0; ki < cards.length; ki++) {
         html += buildCard(cards[ki]);
@@ -532,79 +1403,110 @@ function renderBoard() {
 
 // ---- Build single card HTML ----
 function buildCard(job) {
-  var id = job.id;
-  var html = '<div class="card" id="card-' + id + '"';
+  var id      = job.id;
+  var color   = getAvatarColor(job.company);
+  var initial = getInitial(job.company);
+  var overdue = job.follow_up_date && isOverdue(job.follow_up_date);
+  var isSelected = (detailJobId === id);
+
+  var cls = 'card';
+  if (overdue)    cls += ' overdue-border';
+  if (isSelected) cls += ' selected';
+
+  var html = '<div class="' + cls + '" id="card-' + id + '"';
   html += ' draggable="true"';
   html += ' ondragstart="handleDragStart(event, \'' + id + '\')"';
-  html += ' ondragend="handleDragEnd(event)">';
+  html += ' ondragend="handleDragEnd(event)"';
+  html += ' onclick="openDetailPanel(\'' + id + '\')"';
+  html += ' oncontextmenu="openCtxMenu(event, \'' + id + '\')"';
+  html += '>';
 
+  // Top row: avatar + company/role
+  html += '<div class="card-top">';
+  html += '<div class="card-avatar" style="background:' + color + '">' + esc(initial) + '</div>';
+  html += '<div class="card-titles">';
   html += '<div class="card-company">' + esc(job.company) + '</div>';
   html += '<div class="card-role">'    + esc(job.role)    + '</div>';
-  html += '<div class="card-meta">';
-
-  if (job.date_applied) {
-    html += '<span>Applied: ' + job.date_applied + '</span>';
-  }
-  if (job.salary) {
-    html += '<span>Salary: ' + esc(job.salary) + '</span>';
-  }
-  if (job.follow_up_date) {
-    html += '<span>Follow-up: ' + job.follow_up_date + '</span>';
-  }
-  if (job.job_url) {
-    html += '<span><a href="' + esc(job.job_url) + '" target="_blank" rel="noopener" style="color:#0A66C2">View posting</a></span>';
-  }
-
   html += '</div>';
-  html += '<div class="card-actions">';
-  html += '<button class="btn-edit"   onclick="openModal(\'' + id + '\')">Edit</button>';
-  html += '<button class="btn-delete" onclick="handleDelete(\'' + id + '\')">Delete</button>';
   html += '</div>';
+
+  // Chips
+  var hasChips = job.date_applied || job.salary || job.follow_up_date;
+  if (hasChips) {
+    html += '<div class="card-chips">';
+    if (job.date_applied) {
+      html += '<span class="chip chip-date">' + fmtDate(job.date_applied) + '</span>';
+    }
+    if (job.salary) {
+      html += '<span class="chip chip-salary">' + esc(job.salary) + '</span>';
+    }
+    if (job.follow_up_date) {
+      var ovCls = overdue ? ' overdue' : '';
+      var ovLabel = overdue ? 'Overdue!' : ('Follow-up ' + fmtDate(job.follow_up_date));
+      html += '<span class="chip chip-follow' + ovCls + '">' + esc(ovLabel) + '</span>';
+    }
+    html += '</div>';
+  }
+
+  // Footer: days ago + menu
+  html += '<div class="card-footer">';
+  var ds = daysSince(job.date_applied);
+  if (ds !== null) {
+    var daysLabel = ds === 0 ? 'Today' : (ds === 1 ? '1 day ago' : ds + ' days ago');
+    html += '<span class="card-days-ago">' + daysLabel + '</span>';
+  } else {
+    html += '<span class="card-days-ago"></span>';
+  }
+  html += '<button class="card-menu-btn" onclick="openCtxMenuBtn(event, \'' + id + '\')">...</button>';
+  html += '</div>';
+
   html += '</div>';
   return html;
 }
 
-// ---- Escape HTML to prevent injection ----
-function esc(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g,  '&amp;')
-    .replace(/</g,  '&lt;')
-    .replace(/>/g,  '&gt;')
-    .replace(/"/g,  '&quot;')
-    .replace(/'/g,  '&#39;');
+// ---- Handle sort dropdown ----
+function handleSort(val) {
+  sortMode = val;
+  renderBoard();
 }
 
-// ---- Open modal (null = add new, id = edit) ----
+// ---- Handle search ----
+function handleSearch(val) {
+  filterSearch = val;
+  renderBoard();
+}
+
+// ---- Open modal for a specific status ----
+function openModalForStatus(status) {
+  openModal(null);
+  document.getElementById('fStatus').value = status;
+}
+
+// ---- Open add/edit modal ----
 function openModal(id) {
   editingId = id;
-  var overlay = document.getElementById('modalOverlay');
-  var title   = document.getElementById('modalTitle');
-
+  closeDetailPanel();
   clearForm();
 
   if (id) {
-    title.textContent = 'Edit Job';
-    var job = null;
-    for (var i = 0; i < allJobs.length; i++) {
-      if (allJobs[i].id === id) { job = allJobs[i]; break; }
-    }
+    document.getElementById('modalTitle').textContent = 'Edit Job';
+    var job = findJobById(id);
     if (job) {
-      document.getElementById('fCompany').value  = job.company       || '';
-      document.getElementById('fRole').value     = job.role          || '';
-      document.getElementById('fStatus').value   = job.status        || 'Wishlist';
-      document.getElementById('fDate').value     = job.date_applied  || '';
-      document.getElementById('fSalary').value   = job.salary        || '';
+      document.getElementById('fCompany').value  = job.company        || '';
+      document.getElementById('fRole').value     = job.role           || '';
+      document.getElementById('fStatus').value   = job.status         || 'Wishlist';
+      document.getElementById('fDate').value     = job.date_applied   || '';
+      document.getElementById('fSalary').value   = job.salary         || '';
       document.getElementById('fFollowUp').value = job.follow_up_date || '';
-      document.getElementById('fUrl').value      = job.job_url       || '';
-      document.getElementById('fNotes').value    = job.notes         || '';
+      document.getElementById('fUrl').value      = job.job_url        || '';
+      document.getElementById('fNotes').value    = job.notes          || '';
     }
   } else {
-    title.textContent = 'Add Job';
+    document.getElementById('modalTitle').textContent = 'Add Job';
   }
 
-  overlay.classList.add('active');
-  document.getElementById('fCompany').focus();
+  document.getElementById('modalOverlay').classList.add('active');
+  setTimeout(function() { document.getElementById('fCompany').focus(); }, 50);
 }
 
 // ---- Close modal ----
@@ -614,7 +1516,7 @@ function closeModal() {
   clearForm();
 }
 
-// ---- Close modal when clicking overlay background ----
+// ---- Click on overlay background ----
 function handleOverlayClick(event) {
   if (event.target === document.getElementById('modalOverlay')) {
     closeModal();
@@ -642,43 +1544,33 @@ function saveJob() {
   if (!role)    { alert('Role is required.');    return; }
 
   var payload = {
-    company:         company,
-    role:            role,
-    status:          document.getElementById('fStatus').value   || 'Wishlist',
-    date_applied:    document.getElementById('fDate').value     || null,
-    salary:          document.getElementById('fSalary').value   || null,
-    follow_up_date:  document.getElementById('fFollowUp').value || null,
-    job_url:         document.getElementById('fUrl').value      || null,
-    notes:           document.getElementById('fNotes').value    || null
+    company:        company,
+    role:           role,
+    status:         document.getElementById('fStatus').value   || 'Wishlist',
+    date_applied:   document.getElementById('fDate').value     || null,
+    salary:         document.getElementById('fSalary').value   || null,
+    follow_up_date: document.getElementById('fFollowUp').value || null,
+    job_url:        document.getElementById('fUrl').value      || null,
+    notes:          document.getElementById('fNotes').value    || null
   };
 
   if (editingId) {
-    // Update existing record
     client
       .from('job_applications')
       .update(payload)
       .eq('id', editingId)
       .then(function(res) {
-        if (res.error) {
-          console.error('update error:', res.error);
-          showToast('Error saving job');
-          return;
-        }
+        if (res.error) { console.error('update error:', res.error); showToast('Error saving'); return; }
         showToast('Job updated!');
         closeModal();
         loadJobs();
       });
   } else {
-    // Insert new record
     client
       .from('job_applications')
       .insert([payload])
       .then(function(res) {
-        if (res.error) {
-          console.error('insert error:', res.error);
-          showToast('Error saving job');
-          return;
-        }
+        if (res.error) { console.error('insert error:', res.error); showToast('Error saving'); return; }
         showToast('Job added!');
         closeModal();
         loadJobs();
@@ -686,12 +1578,17 @@ function saveJob() {
   }
 }
 
+// ---- Find job by id ----
+function findJobById(id) {
+  for (var i = 0; i < allJobs.length; i++) {
+    if (allJobs[i].id === id) return allJobs[i];
+  }
+  return null;
+}
+
 // ---- Delete job ----
 function handleDelete(id) {
-  var job = null;
-  for (var i = 0; i < allJobs.length; i++) {
-    if (allJobs[i].id === id) { job = allJobs[i]; break; }
-  }
+  var job  = findJobById(id);
   var name = job ? (job.company + ' - ' + job.role) : id;
   if (!confirm('Delete "' + name + '"?')) return;
 
@@ -700,29 +1597,235 @@ function handleDelete(id) {
     .delete()
     .eq('id', id)
     .then(function(res) {
-      if (res.error) {
-        console.error('delete error:', res.error);
-        showToast('Error deleting job');
-        return;
-      }
+      if (res.error) { console.error('delete error:', res.error); showToast('Error deleting'); return; }
       showToast('Job deleted');
+      if (detailJobId === id) closeDetailPanel();
       loadJobs();
     });
 }
 
-// ---- Search handler ----
-function handleSearch(val) {
-  filterSearch = val;
+// ---- DETAIL PANEL ----
+
+function openDetailPanel(id) {
+  var job = findJobById(id);
+  if (!job) return;
+
+  // Close context menu if open
+  closeCtxMenu();
+
+  detailJobId = id;
+
+  // Populate panel
+  var color   = getAvatarColor(job.company);
+  var initial = getInitial(job.company);
+
+  document.getElementById('detailAvatar').style.background  = color;
+  document.getElementById('detailAvatar').textContent        = initial;
+  document.getElementById('detailCompany').textContent       = job.company || '';
+  document.getElementById('detailRole').textContent          = job.role    || '';
+
+  var badge = document.getElementById('detailStatusBadge');
+  badge.textContent  = job.status || '';
+  badge.className    = 'detail-status-badge badge-' + (job.status || 'Applied');
+
+  document.getElementById('detailStatusSelect').value = job.status || 'Applied';
+
+  document.getElementById('detailDate').textContent    = job.date_applied   ? fmtDate(job.date_applied)   : '-';
+  document.getElementById('detailSalary').textContent  = job.salary         ? job.salary                  : '-';
+
+  var followupEl = document.getElementById('detailFollowup');
+  if (job.follow_up_date) {
+    followupEl.textContent = fmtDate(job.follow_up_date);
+    followupEl.style.color = isOverdue(job.follow_up_date) ? '#C62828' : '#1C1C1C';
+  } else {
+    followupEl.textContent = '-';
+    followupEl.style.color = '';
+  }
+
+  var urlEl  = document.getElementById('detailUrl');
+  if (job.job_url) {
+    urlEl.href        = job.job_url;
+    urlEl.textContent = 'Open posting';
+  } else {
+    urlEl.href        = '#';
+    urlEl.textContent = '-';
+  }
+
+  document.getElementById('detailNotes').value = job.notes || '';
+
+  document.getElementById('detailOverlay').classList.add('open');
+
+  // Highlight selected card
   renderBoard();
 }
 
-// ---- Drag and drop ----
+function closeDetailPanel() {
+  detailJobId = null;
+  document.getElementById('detailOverlay').classList.remove('open');
+  // Remove selected highlight
+  var selected = document.querySelectorAll('.card.selected');
+  for (var i = 0; i < selected.length; i++) {
+    selected[i].classList.remove('selected');
+  }
+}
+
+// Change status from the detail panel dropdown
+function detailChangeStatus(newStatus) {
+  if (!detailJobId) return;
+
+  // Optimistic local update
+  for (var i = 0; i < allJobs.length; i++) {
+    if (allJobs[i].id === detailJobId) {
+      allJobs[i].status = newStatus;
+      break;
+    }
+  }
+
+  var badge = document.getElementById('detailStatusBadge');
+  badge.textContent = newStatus;
+  badge.className   = 'detail-status-badge badge-' + newStatus;
+
+  renderStats();
+  renderSidebar();
+  renderBoard();
+
+  client
+    .from('job_applications')
+    .update({ status: newStatus })
+    .eq('id', detailJobId)
+    .then(function(res) {
+      if (res.error) { showToast('Error updating status'); loadJobs(); return; }
+      showToast('Moved to ' + newStatus);
+    });
+}
+
+// Save notes from detail panel
+function detailSaveNotes() {
+  if (!detailJobId) return;
+  var notes = document.getElementById('detailNotes').value;
+
+  // Update local state
+  for (var i = 0; i < allJobs.length; i++) {
+    if (allJobs[i].id === detailJobId) {
+      allJobs[i].notes = notes;
+      break;
+    }
+  }
+
+  client
+    .from('job_applications')
+    .update({ notes: notes })
+    .eq('id', detailJobId)
+    .then(function(res) {
+      if (res.error) { showToast('Error saving notes'); return; }
+      showToast('Notes saved');
+    });
+}
+
+// Open edit modal from detail panel
+function editFromPanel() {
+  if (!detailJobId) return;
+  openModal(detailJobId);
+}
+
+// Delete from detail panel
+function deleteFromPanel() {
+  if (!detailJobId) return;
+  handleDelete(detailJobId);
+}
+
+// ---- CONTEXT MENU ----
+
+function openCtxMenu(event, id) {
+  event.preventDefault();
+  event.stopPropagation();
+  showCtxMenuAt(event.clientX, event.clientY, id);
+}
+
+function openCtxMenuBtn(event, id) {
+  event.stopPropagation();
+  var rect = event.target.getBoundingClientRect();
+  showCtxMenuAt(rect.left, rect.bottom + 4, id);
+}
+
+function showCtxMenuAt(x, y, id) {
+  ctxJobId = id;
+  var menu = document.getElementById('ctxMenu');
+  var job  = findJobById(id);
+
+  // Build move-to items
+  var moveHtml = '';
+  for (var i = 0; i < COLUMNS.length; i++) {
+    var col = COLUMNS[i];
+    if (job && job.status === col) continue; // skip current
+    moveHtml += '<div class="ctx-menu-item" onclick="ctxMove(\'' + col + '\')">' + col + '</div>';
+  }
+  document.getElementById('ctxMoveItems').innerHTML = moveHtml;
+
+  // Position
+  menu.style.left = x + 'px';
+  menu.style.top  = y + 'px';
+  menu.classList.add('visible');
+
+  // Clamp to viewport
+  var rect = menu.getBoundingClientRect();
+  if (rect.right > window.innerWidth) {
+    menu.style.left = (x - rect.width) + 'px';
+  }
+  if (rect.bottom > window.innerHeight) {
+    menu.style.top = (y - rect.height) + 'px';
+  }
+}
+
+function closeCtxMenu() {
+  document.getElementById('ctxMenu').classList.remove('visible');
+  ctxJobId = null;
+}
+
+function ctxMove(newStatus) {
+  if (!ctxJobId) return;
+  var id = ctxJobId;
+  closeCtxMenu();
+
+  for (var i = 0; i < allJobs.length; i++) {
+    if (allJobs[i].id === id) { allJobs[i].status = newStatus; break; }
+  }
+  renderAll();
+
+  client
+    .from('job_applications')
+    .update({ status: newStatus })
+    .eq('id', id)
+    .then(function(res) {
+      if (res.error) { showToast('Error moving job'); loadJobs(); return; }
+      showToast('Moved to ' + newStatus);
+    });
+}
+
+function ctxEdit() {
+  var id = ctxJobId;
+  closeCtxMenu();
+  if (id) openModal(id);
+}
+
+function ctxDelete() {
+  var id = ctxJobId;
+  closeCtxMenu();
+  if (id) handleDelete(id);
+}
+
+// ---- DRAG AND DROP ----
+
 function handleDragStart(event, id) {
   dragId = id;
   event.dataTransfer.effectAllowed = 'move';
   event.dataTransfer.setData('text/plain', id);
   var card = document.getElementById('card-' + id);
-  if (card) card.classList.add('dragging');
+  if (card) {
+    card.classList.add('dragging');
+    // Prevent click (openDetailPanel) from firing after drag
+    card.setAttribute('data-dragged', '1');
+  }
 }
 
 function handleDragEnd(event) {
@@ -731,7 +1834,6 @@ function handleDragEnd(event) {
     if (card) card.classList.remove('dragging');
   }
   dragId = null;
-  // remove all drag-over highlights
   var cols = document.querySelectorAll('.column-cards');
   for (var i = 0; i < cols.length; i++) {
     cols[i].classList.remove('drag-over');
@@ -765,7 +1867,6 @@ function handleDrop(event, newStatus) {
   var target = event.currentTarget;
   if (target) target.classList.remove('drag-over');
 
-  // Find current status to avoid unnecessary updates
   var currentStatus = null;
   for (var i = 0; i < allJobs.length; i++) {
     if (allJobs[i].id === id) { currentStatus = allJobs[i].status; break; }
@@ -776,31 +1877,38 @@ function handleDrop(event, newStatus) {
   for (var j = 0; j < allJobs.length; j++) {
     if (allJobs[j].id === id) { allJobs[j].status = newStatus; break; }
   }
-  renderBoard();
-  renderStats();
+  renderAll();
 
-  // Persist to Supabase
   client
     .from('job_applications')
     .update({ status: newStatus })
     .eq('id', id)
     .then(function(res) {
-      if (res.error) {
-        console.error('drag-drop update error:', res.error);
-        showToast('Error moving job');
-        loadJobs(); // revert on error
-        return;
-      }
+      if (res.error) { showToast('Error moving job'); loadJobs(); return; }
       showToast('Moved to ' + newStatus);
     });
 }
 
-// ---- Keyboard close modal on Escape ----
+// ---- Global click: close ctx menu if clicking outside ----
+document.addEventListener('click', function(event) {
+  var menu = document.getElementById('ctxMenu');
+  if (menu && menu.classList.contains('visible')) {
+    if (!menu.contains(event.target)) {
+      closeCtxMenu();
+    }
+  }
+});
+
+// ---- Keyboard: Escape closes panels ----
 document.addEventListener('keydown', function(event) {
   if (event.key === 'Escape') {
     var overlay = document.getElementById('modalOverlay');
     if (overlay && overlay.classList.contains('active')) {
       closeModal();
+    } else if (document.getElementById('detailOverlay').classList.contains('open')) {
+      closeDetailPanel();
+    } else {
+      closeCtxMenu();
     }
   }
 });
