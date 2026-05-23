@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>JobTracker — Kevin Malana</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     /* ─── Reset & Base ─────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -927,6 +927,7 @@
 const SUPABASE_URL  = 'https://nxuxxazxkjdorqfmunmq.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54dXh4YXp4a2pkb3JxZm11bm1xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1Mjg4MjUsImV4cCI6MjA5NTEwNDgyNX0.kQQuADeBtiiO7elLBo9CWfbA6k9ZHhKZLU2XoJZhWOQ';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+console.log('Supabase init:', !!supabase);
 
 /* ── Constants ─────────────────────────────────────────────────────── */
 const STATUSES = ['Wishlist', 'Applied', 'Interview', 'Offer', 'Rejected'];
